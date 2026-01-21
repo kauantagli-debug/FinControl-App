@@ -17,27 +17,54 @@ export const SummaryCard: React.FC<SummaryCardProps> = ({
   variant = 'default',
   subtitle
 }) => {
-  const getColors = () => {
+  const getStyles = () => {
     switch (variant) {
-      case 'success': return 'bg-emerald-50 text-emerald-700 border-emerald-100';
-      case 'danger': return 'bg-rose-50 text-rose-700 border-rose-100';
-      case 'warning': return 'bg-amber-50 text-amber-700 border-amber-100';
-      case 'info': return 'bg-blue-50 text-blue-700 border-blue-100';
-      default: return 'bg-white text-slate-700 border-slate-200';
+      case 'success': return {
+        iconBg: 'bg-emerald-100 text-emerald-600',
+        text: 'text-gray-900'
+      };
+      case 'danger': return {
+        iconBg: 'bg-rose-100 text-rose-600',
+        text: 'text-gray-900'
+      };
+      case 'warning': return {
+        iconBg: 'bg-amber-100 text-amber-600',
+        text: 'text-gray-900'
+      };
+      case 'info': return {
+        iconBg: 'bg-brand-100 text-brand-600',
+        text: 'text-brand-900'
+      };
+      default: return {
+        iconBg: 'bg-gray-100 text-gray-600',
+        text: 'text-gray-900'
+      };
     }
   };
 
+  const styles = getStyles();
+
   return (
-    <div className={`p-5 rounded-2xl border shadow-sm flex flex-col justify-between transition-all duration-200 hover:shadow-md ${getColors()}`}>
-      <div className="flex justify-between items-start mb-2">
-        <p className="text-sm font-medium opacity-80">{title}</p>
-        <div className="p-2 bg-white/50 rounded-lg backdrop-blur-sm">
-          <Icon size={20} />
+    <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-soft flex flex-col justify-between transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg h-full">
+      <div className="flex justify-between items-start mb-4">
+        <div>
+          <p className="text-sm font-medium text-gray-500 uppercase tracking-wider">{title}</p>
+        </div>
+        <div className={`p-2.5 rounded-xl ${styles.iconBg}`}>
+          <Icon size={22} strokeWidth={2} />
         </div>
       </div>
       <div>
-        <h3 className="text-2xl font-bold tracking-tight">{formatCurrency(amount)}</h3>
-        {subtitle && <p className="text-xs mt-1 opacity-75">{subtitle}</p>}
+        <h3 className={`text-2xl md:text-3xl font-bold tracking-tight ${styles.text}`}>
+          {formatCurrency(amount)}
+        </h3>
+        {subtitle && (
+          <p className={`text-xs mt-2 font-medium ${
+            subtitle.includes('Negativo') ? 'text-rose-500' : 'text-gray-400'
+          }`}>
+            {subtitle}
+          </p>
+        )}
       </div>
     </div>
   );

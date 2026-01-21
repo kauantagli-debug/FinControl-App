@@ -3,7 +3,7 @@ import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend 
 } from 'recharts';
 import { 
-  Plus, Wallet, TrendingUp, TrendingDown, CreditCard 
+  Plus, Wallet, TrendingUp, TrendingDown, CreditCard, Sparkles 
 } from 'lucide-react';
 
 import { MonthSummary } from './types';
@@ -16,26 +16,17 @@ import { TransactionModal } from './components/TransactionModal';
 import { MonthSelector } from './components/MonthSelector';
 import { TransactionList } from './components/TransactionList';
 
-const COLORS = ['#0ea5e9', '#f43f5e', '#a855f7', '#10b981', '#f59e0b', '#64748b', '#334155'];
+// Updated palette to match the Indigo theme
+const COLORS = ['#6366f1', '#f43f5e', '#a855f7', '#10b981', '#f59e0b', '#64748b', '#334155'];
 
 function App() {
-  // Estado Visual
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Estado de Dados (Custom Hook)
   const { transactions, addTransaction, deleteTransaction } = useTransactions();
-
-  // Valores Computados
   const currentMonthKey = useMemo(() => getMonthKey(currentDate), [currentDate]);
 
   const monthData = useMemo(() => {
-    // Filtragem Crucial: 
-    // Usamos o targetMonth para decidir o que aparece na tela.
-    // Isso garante que compras de cartão apareçam na fatura certa, e não no dia da compra.
     const filtered = transactions.filter(t => t.targetMonth === currentMonthKey);
-
-    // Cálculo de Totais
     const summary: MonthSummary = filtered.reduce((acc, t) => {
       if (t.type === 'income') {
         acc.income += t.amount;
@@ -56,44 +47,39 @@ function App() {
       totalExpenses: 0,
       balance: 0
     });
-
     summary.balance = summary.income - summary.totalExpenses;
-    
-    // Ordenação: Mais recentes primeiro
     const sortedList = [...filtered].sort((a, b) => 
       new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-
     return { summary, transactions: sortedList };
   }, [transactions, currentMonthKey]);
 
-  // Dados para o Gráfico
   const chartData = useMemo(() => {
     const data = [
-      { name: 'Gastos Fixos', value: monthData.summary.fixedExpenses },
-      { name: 'Gastos Variáveis', value: monthData.summary.variableExpenses },
-      { name: 'Fatura Cartão', value: monthData.summary.creditCardBill },
+      { name: 'Fixas', value: monthData.summary.fixedExpenses },
+      { name: 'Variáveis', value: monthData.summary.variableExpenses },
+      { name: 'Cartão', value: monthData.summary.creditCardBill },
     ].filter(i => i.value > 0);
     return data;
   }, [monthData]);
 
-  // Handlers de Navegação
   const handlePrevMonth = () => setCurrentDate(addMonths(currentDate, -1));
   const handleNextMonth = () => setCurrentDate(addMonths(currentDate, 1));
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 bg-gray-50 font-sans">
+    <div className="min-h-screen pb-32 bg-gray-50/50 font-sans selection:bg-brand-500 selection:text-white">
       
-      {/* Header Sticky */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-30 transition-all">
-        <div className="max-w-6xl mx-auto px-4 py-3 md:py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Navbar with blur effect */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="bg-brand-600 text-white p-2.5 rounded-xl shadow-lg shadow-brand-500/20">
-              <Wallet size={24} />
+            <div className="bg-gradient-to-tr from-brand-600 to-brand-400 text-white p-2.5 rounded-xl shadow-lg shadow-brand-500/30">
+              <Wallet size={24} strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-none">FinControl</h1>
-              <span className="text-xs text-brand-600 font-semibold uppercase tracking-wider">Professional</span>
+              <h1 className="text-xl font-bold text-gray-900 tracking-tight leading-none flex items-center gap-2">
+                FinControl <span className="text-xs bg-brand-100 text-brand-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Pro</span>
+              </h1>
             </div>
           </div>
 
@@ -107,12 +93,12 @@ function App() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 md:py-8 space-y-6 md:space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
-        {/* Resumo Financeiro (Cards) */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 animate-fade-in-up">
+        {/* KPI Section */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-in slide-in-from-bottom-4 duration-500">
           <SummaryCard 
-            title="Receitas" 
+            title="Receitas Mensais" 
             amount={monthData.summary.income} 
             icon={TrendingUp} 
             variant="success" 
@@ -122,26 +108,27 @@ function App() {
             amount={monthData.summary.totalExpenses} 
             icon={TrendingDown} 
             variant="danger" 
-            subtitle={`Cartão: ${formatCurrency(monthData.summary.creditCardBill)}`}
+            subtitle={`Inclui cartão: ${formatCurrency(monthData.summary.creditCardBill)}`}
           />
           <SummaryCard 
-            title="Saldo Previsto" 
+            title="Saldo Disponível" 
             amount={monthData.summary.balance} 
             icon={Wallet} 
             variant={monthData.summary.balance >= 0 ? "info" : "warning"}
-            subtitle={monthData.summary.balance < 0 ? "Atenção: Saldo Negativo" : "Saldo positivo"}
+            subtitle={monthData.summary.balance < 0 ? "Saldo Negativo" : "Economia do mês"}
           />
         </section>
 
-        {/* Área Principal: Lista e Gráficos */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           
-          {/* Coluna Esquerda: Lista de Transações */}
-          <section className="lg:col-span-2 space-y-4 animate-fade-in-up delay-100">
+          {/* Main List */}
+          <section className="lg:col-span-2 space-y-6 animate-in slide-in-from-bottom-8 duration-700">
             <div className="flex items-center justify-between px-1">
-              <h2 className="text-xl font-bold text-gray-800">Lançamentos</h2>
-              <span className="text-xs font-medium text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                {monthData.transactions.length} registros
+              <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                Transações Recentes
+              </h2>
+              <span className="text-xs font-semibold text-gray-500 bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm">
+                {monthData.transactions.length} items
               </span>
             </div>
 
@@ -151,12 +138,16 @@ function App() {
             />
           </section>
 
-          {/* Coluna Direita: Gráfico e Widget Cartão */}
-          <aside className="space-y-6 animate-fade-in-up delay-200">
+          {/* Sidebar Widgets */}
+          <aside className="space-y-8 animate-in slide-in-from-bottom-8 duration-1000">
             
-            {/* Gráfico */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 flex flex-col h-[320px]">
-              <h3 className="font-bold text-gray-800 mb-4">Composição de Gastos</h3>
+            {/* Chart */}
+            <div className="bg-white p-6 rounded-2xl shadow-soft border border-gray-100 flex flex-col h-[350px]">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="font-bold text-gray-900">Análise de Gastos</h3>
+                <Sparkles size={16} className="text-brand-400" />
+              </div>
+              
               {chartData.length > 0 ? (
                 <div className="flex-1 w-full min-h-0">
                   <ResponsiveContainer width="100%" height="100%">
@@ -165,9 +156,9 @@ function App() {
                         data={chartData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={55}
-                        outerRadius={75}
-                        paddingAngle={4}
+                        innerRadius={60}
+                        outerRadius={80}
+                        paddingAngle={5}
                         dataKey="value"
                         stroke="none"
                       >
@@ -177,33 +168,63 @@ function App() {
                       </Pie>
                       <Tooltip 
                         formatter={(value: number) => formatCurrency(value)} 
-                        contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                        contentStyle={{ 
+                          borderRadius: '12px', 
+                          border: 'none', 
+                          boxShadow: '0 10px 40px -10px rgba(0,0,0,0.2)',
+                          fontFamily: 'Inter'
+                        }}
                       />
-                      <Legend verticalAlign="bottom" height={36} iconType="circle" />
+                      <Legend 
+                        verticalAlign="bottom" 
+                        height={36} 
+                        iconType="circle"
+                        formatter={(value) => <span className="text-sm font-medium text-gray-600 ml-1">{value}</span>}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                 </div>
               ) : (
-                <div className="flex-1 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-100 rounded-xl">
-                  <p className="text-sm">Sem gastos registrados</p>
+                <div className="flex-1 flex flex-col items-center justify-center text-gray-400 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/50">
+                  <p className="text-sm font-medium">Sem dados visuais</p>
                 </div>
               )}
             </div>
 
-            {/* Widget Cartão */}
-            <div className="bg-gradient-to-br from-slate-800 to-slate-900 text-white p-6 rounded-2xl shadow-xl relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity transform group-hover:scale-110 duration-500">
-                 <CreditCard size={140} />
-               </div>
-               <div className="relative z-10">
-                 <div className="flex items-center gap-2 mb-4 text-brand-200">
-                   <CreditCard size={18} />
-                   <span className="text-sm font-medium uppercase tracking-wider">Fatura do Cartão</span>
+            {/* Realistic Credit Card Widget */}
+            <div className="relative h-56 w-full rounded-2xl bg-gradient-to-bl from-gray-900 via-gray-800 to-black text-white p-6 shadow-2xl shadow-gray-900/20 overflow-hidden group transform transition hover:scale-[1.02] duration-300">
+               {/* Decorative Circles */}
+               <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 rounded-full bg-white/5 blur-3xl"></div>
+               <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 rounded-full bg-brand-500/20 blur-3xl"></div>
+               
+               {/* Card Content */}
+               <div className="relative z-10 flex flex-col justify-between h-full">
+                 <div className="flex justify-between items-start">
+                   <div>
+                     <p className="text-xs font-medium text-gray-400 uppercase tracking-widest mb-1">Fatura Atual</p>
+                     <h3 className="text-3xl font-bold tracking-tight text-white">{formatCurrency(monthData.summary.creditCardBill)}</h3>
+                   </div>
+                   <CreditCard size={32} className="text-brand-400/80" />
                  </div>
-                 <h3 className="text-3xl font-bold tracking-tight mb-2">{formatCurrency(monthData.summary.creditCardBill)}</h3>
-                 <p className="text-xs text-slate-400 max-w-[80%] leading-relaxed">
-                   Este valor está impactando o saldo de <strong>{formatMonthYear(currentDate)}</strong>.
-                 </p>
+                 
+                 <div>
+                   <div className="flex gap-3 mb-6">
+                     <div className="w-12 h-8 bg-amber-200/20 rounded-md border border-amber-200/30 backdrop-blur-sm flex items-center justify-center">
+                       <div className="w-8 h-5 border border-amber-200/40 rounded-sm"></div>
+                     </div>
+                     <div className="w-8 h-8 flex -space-x-3">
+                       <div className="w-8 h-8 rounded-full bg-red-500/80"></div>
+                       <div className="w-8 h-8 rounded-full bg-orange-400/80"></div>
+                     </div>
+                   </div>
+                   <div className="flex justify-between items-end">
+                     <div>
+                        <p className="text-[10px] text-gray-400 uppercase tracking-wider mb-0.5">Vencimento</p>
+                        <p className="font-mono text-sm tracking-wider">{formatMonthYear(currentDate)}</p>
+                     </div>
+                     <p className="font-mono text-lg tracking-widest text-gray-400">•••• 8842</p>
+                   </div>
+                 </div>
                </div>
             </div>
 
@@ -212,10 +233,10 @@ function App() {
         </div>
       </main>
 
-      {/* FAB (Floating Action Button) */}
+      {/* Floating Action Button */}
       <button
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-6 right-6 md:bottom-10 md:right-10 w-14 h-14 md:w-16 md:h-16 bg-brand-600 hover:bg-brand-500 text-white rounded-full shadow-xl shadow-brand-600/40 flex items-center justify-center transition-all hover:scale-110 active:scale-90 z-40 group"
+        className="fixed bottom-8 right-8 w-16 h-16 bg-brand-600 hover:bg-brand-500 text-white rounded-full shadow-lg shadow-brand-600/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95 z-40 group"
         aria-label="Adicionar Transação"
       >
         <Plus size={32} className="group-hover:rotate-90 transition-transform duration-300" />

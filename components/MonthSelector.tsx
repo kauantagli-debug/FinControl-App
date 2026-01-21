@@ -14,25 +14,25 @@ export const MonthSelector: React.FC<MonthSelectorProps> = ({
   onNextMonth 
 }) => {
   return (
-    <div className="flex items-center bg-gray-100 rounded-full p-1 shadow-inner">
+    <div className="flex items-center bg-white rounded-full p-1.5 shadow-sm border border-gray-200">
       <button 
         onClick={onPrevMonth} 
-        className="p-2 hover:bg-white rounded-full shadow-sm transition-all text-gray-600 hover:text-brand-600 active:scale-95"
+        className="p-2 hover:bg-gray-50 text-gray-400 hover:text-brand-600 rounded-full transition-colors active:scale-95"
         aria-label="Mês anterior"
       >
         <ChevronLeft size={20} />
       </button>
       
-      <div className="flex items-center gap-2 px-4 min-w-[160px] md:min-w-[200px] justify-center select-none">
-        <Calendar size={18} className="text-brand-600" />
-        <span className="font-bold text-gray-700 capitalize text-sm md:text-base">
+      <div className="flex items-center gap-2.5 px-6 min-w-[180px] justify-center select-none border-x border-gray-100 mx-1">
+        <Calendar size={16} className="text-brand-500" />
+        <span className="font-bold text-gray-800 capitalize text-sm tracking-wide">
           {formatMonthYear(currentDate)}
         </span>
       </div>
 
       <button 
         onClick={onNextMonth} 
-        className="p-2 hover:bg-white rounded-full shadow-sm transition-all text-gray-600 hover:text-brand-600 active:scale-95"
+        className="p-2 hover:bg-gray-50 text-gray-400 hover:text-brand-600 rounded-full transition-colors active:scale-95"
         aria-label="Próximo mês"
       >
         <ChevronRight size={20} />
