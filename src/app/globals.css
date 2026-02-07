@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+:root {
+  --color-dark: #0f0f1b;
+  --color-surface: #1e1e2e;
+  --color-primary: #6366f1;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #374151;
+  border-radius: 2px;
+}
