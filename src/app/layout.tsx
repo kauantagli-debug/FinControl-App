@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Finance App",
   description: "Controle financeiro pessoal",
   manifest: "/manifest.json",
+};
+
+export const viewport = {
   themeColor: "#4f46e5",
 };
 
