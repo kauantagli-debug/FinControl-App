@@ -24,10 +24,12 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.className} bg-[#0f0f1b] text-white antialiased selection:bg-indigo-500 selection:text-white`}>
         <Providers>
-          {/* Background Glows */}
+          {/* Aurora Background */}
           <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"></div>
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] mix-blend-screen animate-blob"></div>
+            <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[100px] mix-blend-screen animate-blob animation-delay-2000"></div>
+            <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-pink-500/20 rounded-full blur-[100px] mix-blend-screen animate-blob animation-delay-4000"></div>
+            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay"></div>
           </div>
           {children}
         </Providers>
