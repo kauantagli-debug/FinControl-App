@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     }
 
     const { searchParams } = new URL(request.url);
-    const month = parseInt(searchParams.get("month") || new Date().getMonth().toString()) + 1;
+    const month = parseInt(searchParams.get("month") || (new Date().getMonth() + 1).toString());
     const year = parseInt(searchParams.get("year") || new Date().getFullYear().toString());
 
     // Date range for the month

@@ -108,6 +108,16 @@ function DashboardContent() {
                     description,
                     type,
                     categoryId: categoryId || null,
+                    date: (() => {
+                        const now = new Date();
+                        // Create date based on selected month/year, preserving current time
+                        const transactionDate = new Date(currentYear, currentMonth - 1, now.getDate(), now.getHours(), now.getMinutes());
+                        // Check for month overflow (e.g., adding to Feb when today is 30th)
+                        if (transactionDate.getMonth() !== currentMonth - 1) {
+                            transactionDate.setDate(0); // Set to last day of the intended month
+                        }
+                        return transactionDate.toISOString();
+                    })(),
                 }),
             });
 
@@ -243,7 +253,7 @@ function DashboardContent() {
                                     data.transactions.map((t) => (
                                         <div
                                             key={t.id}
-                                            className="bg-[#1e1e2e] border border-gray-800 hover:border-gray-700 rounded-xl p-4 flex items-center justify-between transition-all hover:bg-gray-800 group"
+                                            className="bg-[#1e1e2e] border border-gray-800 hover:border-indigo-500/30 rounded-xl p-4 flex items-center justify-between transition-all hover:bg-[#252538] group hover:shadow-lg hover:shadow-indigo-500/5"
                                         >
                                             <div className="flex items-center gap-4">
                                                 <div
@@ -269,9 +279,12 @@ function DashboardContent() {
                                                 </div>
                                                 <button
                                                     onClick={() => handleDelete(t.id)}
-                                                    className="text-xs text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all ml-2"
+                                                    title="Excluir"
                                                 >
-                                                    Excluir
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
                                                 </button>
                                             </div>
                                         </div>
@@ -347,8 +360,8 @@ function DashboardContent() {
                                     key={`${m.year}-${m.month}`}
                                     href={`/dashboard?month=${m.month}&year=${m.year}`}
                                     className={`block w-full p-3 rounded-xl transition-all flex items-center justify-between ${m.active
-                                            ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                                            : "bg-[#1e1e2e] text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-800"
+                                        ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
+                                        : "bg-[#1e1e2e] text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-800"
                                         }`}
                                 >
                                     <span className="font-bold capitalize">{m.name}</span>
