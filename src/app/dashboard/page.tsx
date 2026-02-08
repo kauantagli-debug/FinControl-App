@@ -281,46 +281,45 @@ function DashboardContent() {
                                 <h3 className="font-bold text-white">Transações</h3>
                                 {data?.transactions && data.transactions.length > 0 ? (
                                     data.transactions.map((t) => (
-                                        data.transactions.map((t) => (
-                                            <div
-                                                key={t.id}
-                                                className="glass rounded-xl p-4 flex items-center justify-between transition-all hover:bg-white/5 group border border-white/5"
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div
-                                                        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-lg ${t.type === "INCOME" ? "bg-emerald-500/10 text-emerald-400 shadow-emerald-500/10" : "bg-rose-500/10 text-rose-400 shadow-rose-500/10"
-                                                            }`}
-                                                    >
-                                                        {t.category?.icon || "📂"}
-                                                    </div>
-                                                    <div>
-                                                        <div className="font-bold text-white text-sm">{t.description}</div>
-                                                        <div className="text-xs text-gray-500">
-                                                            {new Date(t.date).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })} •{" "}
-                                                            {t.category?.name || "Geral"}
-                                                        </div>
-                                                    </div>
+                                        <div
+                                            key={t.id}
+                                            className="glass rounded-xl p-4 flex items-center justify-between transition-all hover:bg-white/5 group border border-white/5"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div
+                                                    className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg shadow-lg ${t.type === "INCOME" ? "bg-emerald-500/10 text-emerald-400 shadow-emerald-500/10" : "bg-rose-500/10 text-rose-400 shadow-rose-500/10"
+                                                        }`}
+                                                >
+                                                    {t.category?.icon || "📂"}
                                                 </div>
-                                                <div className="text-right">
-                                                    <div
-                                                        className={`font-bold font-mono text-base ${t.type === "INCOME" ? "text-emerald-400" : "text-white"
-                                                            }`}
-                                                    >
-                                                        {t.type === "INCOME" ? "+" : "-"}R$ {parseFloat(t.amount).toFixed(2)}
+                                                <div>
+                                                    <div className="font-bold text-white text-sm">{t.description}</div>
+                                                    <div className="text-xs text-gray-500">
+                                                        {new Date(t.date).toLocaleDateString("pt-BR", { month: "short", day: "numeric" })} •{" "}
+                                                        {t.category?.name || "Geral"}
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleDelete(t.id)}
-                                                        className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all ml-2"
-                                                        title="Excluir"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                    </button>
                                                 </div>
                                             </div>
-                                        ))
-                                    ) : (
+                                            <div className="text-right">
+                                                <div
+                                                    className={`font-bold font-mono text-base ${t.type === "INCOME" ? "text-emerald-400" : "text-white"
+                                                        }`}
+                                                >
+                                                    {t.type === "INCOME" ? "+" : "-"}R$ {parseFloat(t.amount).toFixed(2)}
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDelete(t.id)}
+                                                    className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all ml-2"
+                                                    title="Excluir"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))
+                                ) : (
                                     <div className="text-gray-500 text-center py-8">Nenhuma transação neste mês.</div>
                                 )}
                             </div>
