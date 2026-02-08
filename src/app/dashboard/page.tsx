@@ -50,15 +50,22 @@ function DashboardContent() {
     const currentYear = parseInt(searchParams.get("year") || new Date().getFullYear().toString());
 
     // Generate month list
+    // Generate month list for 2026
     const monthList = [];
-    const now = new Date();
+    // Fixed to 2026 as per user request
+    const targetYear = 2026;
+
     for (let i = 0; i < 12; i++) {
-        const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const date = new Date(targetYear, i, 1);
+        const name = date.toLocaleString("pt-BR", { month: "long" });
+        // Capitalize first letter
+        const capitalizedName = name.charAt(0).toUpperCase() + name.slice(1);
+
         monthList.push({
-            name: date.toLocaleString("pt-BR", { month: "long" }),
-            year: date.getFullYear(),
-            month: date.getMonth() + 1,
-            active: date.getMonth() + 1 === currentMonth && date.getFullYear() === currentYear,
+            name: capitalizedName,
+            year: targetYear,
+            month: i + 1,
+            active: (i + 1) === currentMonth && targetYear === currentYear,
         });
     }
 
@@ -184,18 +191,41 @@ function DashboardContent() {
 
             <div className="h-16"></div>
 
-            {/* Main Content */}
             <main className="container mx-auto px-4 py-8">
-                <div className="flex flex-col lg:flex-row gap-8">
-                    {/* Left Content */}
-                    <div className="flex-1 space-y-8">
-                        {/* Header */}
-                        <div className="animate-fadeIn">
-                            <h1 className="text-3xl font-bold text-white mb-2">Bem-vindo de volta! 👋</h1>
-                            <p className="text-gray-400">
-                                Aqui está seu resumo financeiro para{" "}
-                                <span className="text-indigo-400 font-semibold capitalize">{currentMonthName}</span>.
-                            </p>
+                <div className="flex flex-col gap-8">
+                    {/* Main Content */}
+                    <div className="space-y-8">
+                        {/* Header & Month Selector */}
+                        <div className="animate-fadeIn flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <h1 className="text-3xl font-bold text-white mb-2">Bem-vindo de volta! 👋</h1>
+                                <p className="text-gray-400">
+                                    Resumo financeiro de <span className="text-indigo-400 font-semibold">{currentYear}</span>
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3 bg-[#1e1e2e] p-1.5 pr-4 rounded-xl border border-gray-800 shadow-sm">
+                                <div className="bg-indigo-500/10 p-2 rounded-lg text-indigo-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <select
+                                    value={`${currentYear}-${currentMonth}`}
+                                    onChange={(e) => {
+                                        const [y, m] = e.target.value.split('-');
+                                        router.push(`/dashboard?month=${m}&year=${y}`);
+                                    }}
+                                    className="bg-transparent text-white font-medium outline-none cursor-pointer appearance-none pr-8 relative z-10"
+                                    style={{ backgroundImage: 'none' }}
+                                >
+                                    {monthList.map((m) => (
+                                        <option key={`${m.year}-${m.month}`} value={`${m.year}-${m.month}`} className="bg-[#1e1e2e] text-white">
+                                            {m.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
                         </div>
 
                         {/* Stats Cards */}
@@ -348,26 +378,6 @@ function DashboardContent() {
                                     </form>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    {/* Right Sidebar - Months */}
-                    <div className="w-full lg:w-64 space-y-4 animate-fadeIn">
-                        <h3 className="font-bold text-white mb-2">Meses</h3>
-                        <div className="space-y-2 max-h-[calc(100vh-100px)] overflow-y-auto pr-2 custom-scrollbar">
-                            {monthList.map((m) => (
-                                <Link
-                                    key={`${m.year}-${m.month}`}
-                                    href={`/dashboard?month=${m.month}&year=${m.year}`}
-                                    className={`block w-full p-3 rounded-xl transition-all flex items-center justify-between ${m.active
-                                        ? "bg-indigo-500 text-white shadow-lg shadow-indigo-500/20"
-                                        : "bg-[#1e1e2e] text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-800"
-                                        }`}
-                                >
-                                    <span className="font-bold capitalize">{m.name}</span>
-                                    <span className="text-xs opacity-70">{m.year}</span>
-                                </Link>
-                            ))}
                         </div>
                     </div>
                 </div>
