@@ -8,13 +8,58 @@ datasource db {
   directUrl = env("POSTGRES_URL_NON_POOLING")
 }
 
+
 model User {
   id           String        @id @default(cuid())
+  name         String?
   email        String        @unique
   password     String
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   transactions Transaction[]
+  budgets      Budget[]
+  goals        Goal[]
+  achievements Achievement[]
+  cards        CreditCard[]
+  stats        UserStats?
+}
+
+model Goal {
+  id          String    @id @default(cuid())
+  name        String
+  targetAmount Decimal  @db.Decimal(12, 2)
+  currentAmount Decimal @db.Decimal(12, 2) @default(0)
+  deadline    DateTime?
+  icon        String?
+  color       String    @default("#6b2c91")
+  isCompleted Boolean   @default(false)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Achievement {
+  id          String   @id @default(cuid())
+  type        String   // "STREAK", "SAVINGS", "BUDGET", "MILESTONE"
+  name        String
+  description String
+  icon        String
+  unlockedAt  DateTime @default(now())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserStats {
+  id             String @id @default(cuid())
+  currentStreak  Int    @default(0)
+  longestStreak  Int    @default(0)
+  totalSaved     Decimal @db.Decimal(12, 2) @default(0)
+  level          Int    @default(1)
+  xp             Int    @default(0)
+  lastActivityAt DateTime?
+  userId         String @unique
+  user           User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -24,6 +69,7 @@ model Category {
   color        String        @default("bg-gray-500")
   isIncome     Boolean       @default(false)
   transactions Transaction[]
+  budgets      Budget[]
 }
 
 model Transaction {
@@ -39,4 +85,35 @@ model Transaction {
   user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   categoryId  String?
   category    Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  cardId      String?
+  card        CreditCard? @relation(fields: [cardId], references: [id], onDelete: SetNull)
+}
+
+model CreditCard {
+  id          String        @id @default(cuid())
+  name        String
+  last4Digits String
+  color       String        @default("from-purple-600 to-indigo-600")
+  limit       Decimal       @db.Decimal(12, 2)
+  closingDay  Int
+  dueDay      Int
+  userId      String
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Budget {
+  id         String   @id @default(cuid())
+  amount     Decimal  @db.Decimal(12, 2)
+  month      Int
+  year       Int
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, categoryId, month, year])
 }

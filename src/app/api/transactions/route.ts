@@ -75,7 +75,7 @@ export async function POST(request: Request) {
 
     try {
         const body = await request.json();
-        const { amount, description, type, categoryId, date } = body;
+        const { amount, description, type, categoryId, date, cardId } = body;
 
         if (!amount || !description) {
             return NextResponse.json(
@@ -84,7 +84,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const transaction = await prisma.transaction.create({
+        const transaction = await (prisma as any).transaction.create({
             data: {
                 amount: parseFloat(amount),
                 description,
@@ -93,13 +93,77 @@ export async function POST(request: Request) {
                 date: date ? new Date(date) : new Date(),
                 userId: session.user.id,
                 categoryId: categoryId || null,
+                cardId: cardId || null,
             },
-            include: {
-                category: true,
+            include: { category: true }
+        });
+
+        // Gamification: Update Streak & XP
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const stats = await (prisma as any).userStats.findUnique({ where: { userId: session.user.id } });
+
+        let newStreak = stats?.currentStreak || 0;
+        const lastActivity = stats?.lastActivityAt ? new Date(stats.lastActivityAt) : null;
+
+        if (lastActivity) lastActivity.setHours(0, 0, 0, 0);
+
+        if (!lastActivity || lastActivity.getTime() < today.getTime()) {
+            const yesterday = new Date(today);
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            if (lastActivity && lastActivity.getTime() === yesterday.getTime()) {
+                // Continued streak
+                newStreak += 1;
+            } else if (!lastActivity || lastActivity.getTime() !== today.getTime()) {
+                // Broken streak or first time (unless already logged today)
+                if (!lastActivity || lastActivity.getTime() < yesterday.getTime()) {
+                    newStreak = 1;
+                }
+            }
+        }
+
+        // Calculate Level Up
+        const currentXP = stats?.xp || 0;
+        const currentLevel = stats?.level || 1;
+        const addedXP = 10;
+
+        let newXP = currentXP + addedXP;
+        let newLevel = currentLevel;
+
+        while (true) {
+            const threshold = newLevel * 1000;
+            if (newXP >= threshold) {
+                newXP -= threshold;
+                newLevel += 1;
+            } else {
+                break;
+            }
+        }
+
+        await (prisma as any).userStats.upsert({
+            where: { userId: session.user.id },
+            create: {
+                userId: session.user.id,
+                currentStreak: 1,
+                longestStreak: 1,
+                xp: 10,
+                level: 1,
+                lastActivityAt: new Date(),
+            },
+            update: {
+                currentStreak: newStreak,
+                longestStreak: Math.max(newStreak, stats?.longestStreak || 0),
+                xp: newXP,
+                level: newLevel,
+                lastActivityAt: new Date(),
             }
         });
 
         return NextResponse.json(transaction);
+
+
 
     } catch (error) {
         console.error("Transaction creation error:", error);
