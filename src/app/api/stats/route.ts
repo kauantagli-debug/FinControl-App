@@ -3,18 +3,18 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request) {
+export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let stats = await (prisma as any).userStats.findUnique({
+    let stats = await prisma.userStats.findUnique({
         where: { userId: session.user.id },
     });
 
     if (!stats) {
-        stats = await (prisma as any).userStats.create({
+        stats = await prisma.userStats.create({
             data: {
                 userId: session.user.id,
                 level: 1,

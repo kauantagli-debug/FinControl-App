@@ -34,14 +34,14 @@ export async function POST(request: Request) {
         }
 
         // Auto-categorize and Match Existing Categories
-        const categories = await (prisma as any).category.findMany();
+        const categories = await prisma.category.findMany();
 
         const enrichedTransactions = transactions.map(t => {
             const suggestedName = suggestCategory(t.description);
             let categoryId = null;
 
             if (suggestedName) {
-                const match = categories.find((c: any) => c.name.toLowerCase() === suggestedName.toLowerCase());
+                const match = categories.find((c) => c.name.toLowerCase() === suggestedName.toLowerCase());
                 if (match) categoryId = match.id;
             }
 
@@ -74,13 +74,9 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: "Invalid data" }, { status: 400 });
         }
 
-        const created = await (prisma as any).transaction.createMany({
+        const created = await prisma.transaction.createMany({
             data: transactions.map((t: any) => ({
-                amount: t.type === 'EXPENSE' ? parseFloat(t.amount) : parseFloat(t.amount), // Amount is usually absolute in import, but Type handles sign logic? 
-                // Wait, our DB stores positive amounts usually, and Type field handles sign logic in UI?
-                // Let's check `Transaction` model. `type` String @default("EXPENSE"). `amount` Decimal.
-                // Usually we store positive amount and use Type to differentiate.
-                // So:
+                amount: parseFloat(t.amount), // Amount is usually absolute in import, but Type handles sign logic
                 description: t.description,
                 date: new Date(t.date),
                 type: t.type,

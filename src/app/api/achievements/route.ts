@@ -3,13 +3,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request) {
+export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const achievements = await (prisma as any).achievement.findMany({
+    const achievements = await prisma.achievement.findMany({
         where: { userId: session.user.id },
         orderBy: { unlockedAt: "desc" },
     });
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         const { type, name, description, icon } = await request.json();
 
         // Check if already unlocked
-        const existing = await (prisma as any).achievement.findFirst({
+        const existing = await prisma.achievement.findFirst({
             where: {
                 userId: session.user.id,
                 name: name,
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ message: "Already unlocked" });
         }
 
-        const achievement = await (prisma as any).achievement.create({
+        const achievement = await prisma.achievement.create({
             data: {
                 type,
                 name,
@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         });
 
         // Calculate Level Up
-        const stats = await (prisma as any).userStats.findUnique({ where: { userId: session.user.id } });
+        const stats = await prisma.userStats.findUnique({ where: { userId: session.user.id } });
 
         const currentXP = stats?.xp || 0;
         const currentLevel = stats?.level || 1;
@@ -69,7 +69,7 @@ export async function POST(request: Request) {
             }
         }
 
-        await (prisma as any).userStats.upsert({
+        await prisma.userStats.upsert({
             where: { userId: session.user.id },
             create: {
                 userId: session.user.id,
@@ -87,6 +87,7 @@ export async function POST(request: Request) {
         return NextResponse.json(achievement);
 
     } catch (error) {
+        console.error("Achievement Error:", error);
         return NextResponse.json({ error: "Failed to unlock achievement" }, { status: 500 });
     }
 }

@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request) {
+export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -14,11 +14,11 @@ export async function GET(request: Request) {
         const userId = session.user.id;
 
         const data = await Promise.all([
-            (prisma as any).transaction.findMany({ where: { userId } }),
-            (prisma as any).budget.findMany({ where: { userId } }),
-            (prisma as any).goal.findMany({ where: { userId } }),
-            (prisma as any).creditCard.findMany({ where: { userId } }), // If exists
-            (prisma as any).category.findMany(), // Global or User specific? Standard ones are global.
+            prisma.transaction.findMany({ where: { userId } }),
+            prisma.budget.findMany({ where: { userId } }),
+            prisma.goal.findMany({ where: { userId } }),
+            prisma.creditCard.findMany({ where: { userId } }), // If exists
+            prisma.category.findMany(), // Global or User specific? Standard ones are global.
         ]);
 
         const backup = {

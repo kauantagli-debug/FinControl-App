@@ -4,14 +4,14 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request) {
+export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     try {
-        const cards = await (prisma as any).creditCard.findMany({
+        const cards = await prisma.creditCard.findMany({
             where: { userId: session.user.id },
             include: {
                 transactions: {
@@ -21,8 +21,7 @@ export async function GET(request: Request) {
             }
         });
 
-        // Calculate Virtual Invoice for each card
-        const cardsWithInvoice = cards.map((card: any) => {
+        const cardsWithInvoice = cards.map((card) => {
             const today = new Date();
             const closingDay = card.closingDay;
 
@@ -45,7 +44,7 @@ export async function GET(request: Request) {
             startDate.setHours(0, 0, 0, 0);
             endDate.setHours(23, 59, 59, 999);
 
-            const currentInvoice = card.transactions.reduce((sum: number, t: any) => {
+            const currentInvoice = card.transactions.reduce((sum, t) => {
                 const tDate = new Date(t.date);
                 if (tDate >= startDate && tDate <= endDate) {
                     return sum + parseFloat(t.amount.toString());
@@ -85,7 +84,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Missing fields" }, { status: 400 });
         }
 
-        const card = await (prisma as any).creditCard.create({
+        const card = await prisma.creditCard.create({
             data: {
                 name,
                 last4Digits: last4Digits || "0000",

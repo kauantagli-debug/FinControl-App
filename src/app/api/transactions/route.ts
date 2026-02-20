@@ -84,7 +84,7 @@ export async function POST(request: Request) {
             );
         }
 
-        const transaction = await (prisma as any).transaction.create({
+        const transaction = await prisma.transaction.create({
             data: {
                 amount: parseFloat(amount),
                 description,
@@ -102,7 +102,7 @@ export async function POST(request: Request) {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
-        const stats = await (prisma as any).userStats.findUnique({ where: { userId: session.user.id } });
+        const stats = await prisma.userStats.findUnique({ where: { userId: session.user.id } });
 
         let newStreak = stats?.currentStreak || 0;
         const lastActivity = stats?.lastActivityAt ? new Date(stats.lastActivityAt) : null;
@@ -142,7 +142,7 @@ export async function POST(request: Request) {
             }
         }
 
-        await (prisma as any).userStats.upsert({
+        await prisma.userStats.upsert({
             where: { userId: session.user.id },
             create: {
                 userId: session.user.id,

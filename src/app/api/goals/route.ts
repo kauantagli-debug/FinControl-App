@@ -3,13 +3,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-export async function GET(request: Request) {
+export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const goals = await (prisma as any).goal.findMany({
+    const goals = await prisma.goal.findMany({
         where: { userId: session.user.id },
         orderBy: { createdAt: "desc" },
     });
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
         const body = await request.json();
         const { name, targetAmount, deadline, icon, color } = body;
 
-        const goal = await (prisma as any).goal.create({
+        const goal = await prisma.goal.create({
             data: {
                 name,
                 targetAmount: parseFloat(targetAmount),
@@ -61,7 +61,7 @@ export async function PUT(request: Request) {
             return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
         }
 
-        const existingGoal = await (prisma as any).goal.findUnique({
+        const existingGoal = await prisma.goal.findUnique({
             where: { id, userId: session.user.id }
         });
 
@@ -72,7 +72,7 @@ export async function PUT(request: Request) {
         const target = parseFloat(existingGoal.targetAmount.toString());
         const isCompleted = newAmount >= target;
 
-        const updatedGoal = await (prisma as any).goal.update({
+        const updatedGoal = await prisma.goal.update({
             where: { id },
             data: {
                 currentAmount: newAmount,

@@ -7,7 +7,7 @@ import { calculateTrend } from "@/lib/ai/forecasting";
 import { detectAnomalies } from "@/lib/ai/anomalies";
 import { detectRecurring } from "@/lib/ai/patterns";
 
-export async function GET(request: Request) {
+export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,11 +60,12 @@ export async function GET(request: Request) {
         // 3. Patterns (All history)
         const transactionObjects = transactions.map(t => ({
             ...t,
-            amount: Number(t.amount),
-            date: new Date(t.date) // Ensure Date object
-        })); // Cast to correct type structure if needed
+            type: t.type as "INCOME" | "EXPENSE",
+            amount: parseFloat(t.amount.toString()),
+            date: t.date.toISOString()
+        }));
 
-        const recurring = detectRecurring(transactionObjects as any);
+        const recurring = detectRecurring(transactionObjects);
 
         // 4. Generate Tips
         const tips: string[] = [];

@@ -65,21 +65,24 @@ function CategoryDonut({ data, total }: { data: ReportData['categoryBreakdown'];
     const radius = (size - strokeWidth) / 2;
     const circumference = 2 * Math.PI * radius;
 
-    let cumulativePercent = 0;
-    const segments = data.map((item, index) => {
+    const segments = data.reduce((acc, item, index) => {
         const percent = total > 0 ? item.total / total : 0;
-        const offset = circumference * (1 - cumulativePercent);
-        const length = circumference * percent;
-        cumulativePercent += percent;
+        const prevCumulative = acc.currentCumulative;
 
-        return {
+        const offset = circumference * (1 - prevCumulative);
+        const length = circumference * percent;
+
+        acc.items.push({
             ...item,
             chartColor: CHART_COLORS[index % CHART_COLORS.length],
             offset,
             length,
             percent: Math.round(percent * 100),
-        };
-    });
+        });
+
+        acc.currentCumulative += percent;
+        return acc;
+    }, { items: [] as Array<typeof data[0] & { chartColor: string; offset: number; length: number; percent: number }>, currentCumulative: 0 }).items;
 
     return (
         <div className="flex flex-col items-center gap-4">
