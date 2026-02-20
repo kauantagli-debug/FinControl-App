@@ -3,6 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -41,7 +43,10 @@ export async function POST(request: Request) {
         return NextResponse.json(goal);
     } catch (error) {
         console.error("Goal creation error:", error);
-        return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : "Failed to create goal" },
+            { status: 500 }
+        );
     }
 }
 

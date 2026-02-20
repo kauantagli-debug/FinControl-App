@@ -1,7 +1,8 @@
 'use client';
 
-import { ChevronDown, Bell } from 'lucide-react';
+import { ChevronDown, Bell, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 interface DashboardHeaderProps {
     currentMonth: number;
@@ -34,6 +35,13 @@ export function DashboardHeader({ currentMonth, currentYear }: DashboardHeaderPr
                 <button className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white active:scale-95 transition-transform hover:bg-white/10">
                     <Bell className="w-5 h-5" />
                 </button>
+                <button
+                    onClick={() => signOut()}
+                    className="w-10 h-10 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 active:scale-95 transition-transform hover:bg-red-500/20 ml-2"
+                    title="Sair"
+                >
+                    <LogOut className="w-5 h-5" />
+                </button>
             </header>
 
             {/* Month Selector */}
@@ -43,8 +51,8 @@ export function DashboardHeader({ currentMonth, currentYear }: DashboardHeaderPr
                         key={m.val}
                         onClick={() => handleMonthChange(m.val)}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${m.val === currentMonth
-                                ? "bg-purple-600 text-white shadow-lg shadow-purple-900/40 scale-105"
-                                : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200"
+                            ? "bg-purple-600 text-white shadow-lg shadow-purple-900/40 scale-105"
+                            : "bg-white/5 text-zinc-400 hover:bg-white/10 hover:text-zinc-200"
                             }`}
                     >
                         {m.name}
