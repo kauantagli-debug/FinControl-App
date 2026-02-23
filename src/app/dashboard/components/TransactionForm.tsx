@@ -52,10 +52,13 @@ export function TransactionForm({ categories, cards = [], onTransactionAdded, is
                 setCategoryId('');
                 setCardId('');
             } else {
-                console.error("Failed to save transaction");
+                const data = await res.json();
+                console.error("Failed to save transaction:", data.error || res.statusText);
+                alert(`Erro ao salvar: ${data.error || "Tente novamente."}`);
             }
         } catch (error) {
             console.error("Error submitting transaction", error);
+            alert("Erro de conexão ao salvar transação.");
         } finally {
             setIsLoading(false);
         }

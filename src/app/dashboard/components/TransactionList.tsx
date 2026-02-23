@@ -16,12 +16,16 @@ export function TransactionList({ transactions, onTransactionDeleted }: Transact
         if (!confirm('Tem certeza que deseja excluir?')) return;
         setDeletingId(id);
         try {
-            const res = await fetch(`/api/transactions?id=${id}`, { method: 'DELETE' });
+            const res = await fetch(`/api/transactions/${id}`, { method: 'DELETE' });
             if (res.ok) {
                 onTransactionDeleted();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || 'Erro ao excluir transação.');
             }
         } catch (e) {
             console.error(e);
+            alert('Erro de conexão ao tentar excluir.');
         } finally {
             setDeletingId(null);
         }
