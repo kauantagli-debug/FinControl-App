@@ -128,6 +128,7 @@ export async function POST(request: Request) {
         const stats = await prisma.userStats.findUnique({ where: { userId: session.user.id } });
 
         let newStreak = stats?.currentStreak || 0;
+        let streakBonusXP = 0;
         const lastActivity = stats?.lastActivityAt ? new Date(stats.lastActivityAt) : null;
 
         if (lastActivity) lastActivity.setHours(0, 0, 0, 0);
@@ -139,8 +140,9 @@ export async function POST(request: Request) {
             if (lastActivity && lastActivity.getTime() === yesterday.getTime()) {
                 // Continued streak
                 newStreak += 1;
+                streakBonusXP = 25; // Bonus for maintaining streak
             } else if (!lastActivity || lastActivity.getTime() !== today.getTime()) {
-                // Broken streak or first time (unless already logged today)
+                // Broken streak or first time
                 if (!lastActivity || lastActivity.getTime() < yesterday.getTime()) {
                     newStreak = 1;
                 }
@@ -150,13 +152,13 @@ export async function POST(request: Request) {
         // Calculate Level Up
         const currentXP = stats?.xp || 0;
         const currentLevel = stats?.level || 1;
-        const addedXP = 10;
+        const addedXP = 50 + streakBonusXP; // 50 XP per transaction + streak bonus
 
         let newXP = currentXP + addedXP;
         let newLevel = currentLevel;
 
         while (true) {
-            const threshold = newLevel * 1000;
+            const threshold = newLevel * 150;
             if (newXP >= threshold) {
                 newXP -= threshold;
                 newLevel += 1;
@@ -171,7 +173,7 @@ export async function POST(request: Request) {
                 userId: session.user.id,
                 currentStreak: 1,
                 longestStreak: 1,
-                xp: 10,
+                xp: 50,
                 level: 1,
                 lastActivityAt: new Date(),
             },

@@ -12,7 +12,8 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ currentMonth, currentYear }: DashboardHeaderProps) {
     const router = useRouter();
     const { data: session } = useSession();
-    const userName = session?.user?.name ? session.user.name.split(' ')[0] : 'Usuário';
+    const rawName = session?.user?.name || session?.user?.email?.split('@')[0] || 'Usuário';
+    const userName = rawName.charAt(0).toUpperCase() + rawName.slice(1).split(' ')[0];
 
     const months = [
         { name: "Jan", val: 1 }, { name: "Fev", val: 2 }, { name: "Mar", val: 3 },

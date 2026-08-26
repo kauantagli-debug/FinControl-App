@@ -5,7 +5,8 @@ import bcrypt from "bcryptjs";
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { email, password } = body;
+        const { name, email, password } = body;
+        const finalName = name?.trim() || email.split('@')[0];
 
         if (!email || !password) {
             return NextResponse.json(
@@ -32,6 +33,7 @@ export async function POST(request: Request) {
         // Create user
         const user = await prisma.user.create({
             data: {
+                name: finalName,
                 email: email.toLowerCase(),
                 password: hashedPassword,
             }
@@ -39,6 +41,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             id: user.id,
+            name: user.name,
             email: user.email
         });
 

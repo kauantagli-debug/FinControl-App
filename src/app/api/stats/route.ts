@@ -15,14 +15,39 @@ export async function GET() {
         where: { userId: session.user.id },
     });
 
+    const txCount = await prisma.transaction.count({
+        where: { userId: session.user.id }
+    });
+
+    let totalCalculatedXP = txCount * 50 + ((stats?.longestStreak || 1) * 25);
+    let calculatedLevel = 1;
+    let remainingXP = totalCalculatedXP;
+    while (true) {
+        const threshold = calculatedLevel * 150;
+        if (remainingXP >= threshold) {
+            remainingXP -= threshold;
+            calculatedLevel += 1;
+        } else {
+            break;
+        }
+    }
+
     if (!stats) {
         stats = await prisma.userStats.create({
             data: {
                 userId: session.user.id,
-                level: 1,
-                xp: 0,
-                currentStreak: 0,
+                level: calculatedLevel,
+                xp: remainingXP,
+                currentStreak: txCount > 0 ? 1 : 0,
             },
+        });
+    } else if (calculatedLevel > stats.level || (calculatedLevel === stats.level && remainingXP > stats.xp)) {
+        stats = await prisma.userStats.update({
+            where: { userId: session.user.id },
+            data: {
+                level: calculatedLevel,
+                xp: remainingXP,
+            }
         });
     }
 

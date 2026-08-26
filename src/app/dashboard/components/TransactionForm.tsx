@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { X, Calendar, Tag, FileText, CheckCircle2, ChevronDown, CreditCard, Loader2 } from 'lucide-react';
@@ -116,36 +117,55 @@ export function TransactionForm({ categories, cards = [], onTransactionAdded, is
                     </div>
 
                     {/* Card Selector (Expense Only) */}
-                    {type === 'EXPENSE' && cards && cards.length > 0 && (
-                        <div className="relative group mt-2">
-                            <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-purple-400 transition-colors" />
-                            <select
-                                {...register('cardId')}
-                                className="w-full bg-[#1c1c26] border border-white/5 rounded-xl py-3 pl-12 pr-4 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                            >
-                                <option value="">Saldo da Conta (Débito/Dinheiro)</option>
-                                {cards.map(card => (
-                                    <option key={card.id} value={card.id}>
-                                        Cartão {card.name} (Final {card.last4Digits})
-                                    </option>
-                                ))}
-                            </select>
-                            <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
-                        </div>
-                    )}
+                    {type === 'EXPENSE' && (
+                        cards && cards.length > 0 ? (
+                            <div className="space-y-2 mt-2">
+                                <div className="relative group">
+                                    <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-purple-400 transition-colors" />
+                                    <select
+                                        {...register('cardId')}
+                                        className="w-full bg-[#1c1c26] border border-white/5 rounded-xl py-3 pl-12 pr-4 text-white appearance-none focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all text-sm"
+                                    >
+                                        <option value="">Saldo da Conta (Débito/Dinheiro)</option>
+                                        {cards.map(card => (
+                                            <option key={card.id} value={card.id}>
+                                                💳 Cartão {card.name} (Final {card.last4Digits})
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+                                </div>
 
-                    {/* Installments (If Card Selected) */}
-                    {type === 'EXPENSE' && cardId && (
-                        <div className="relative group">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500">Parcelas</span>
-                            <input
-                                type="number"
-                                min="1"
-                                max="24"
-                                {...register('installments', { valueAsNumber: true })}
-                                className="w-full bg-[#1c1c26] border border-white/5 rounded-xl py-3 pl-24 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all"
-                            />
-                        </div>
+                                {/* Installments (If Card Selected) */}
+                                {cardId && (
+                                    <div className="relative group animate-fadeIn">
+                                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 text-xs font-medium">Nº Parcelas</span>
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="24"
+                                            placeholder="1"
+                                            {...register('installments', { valueAsNumber: true })}
+                                            className="w-full bg-[#1c1c26] border border-white/5 rounded-xl py-3 pl-28 pr-4 text-white placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500/50 transition-all text-sm"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="mt-2 p-3 bg-purple-500/5 border border-purple-500/10 rounded-xl flex items-center justify-between text-xs">
+                                <span className="text-zinc-400 flex items-center gap-1.5">
+                                    <CreditCard className="w-4 h-4 text-purple-400" />
+                                    Pagar no crédito / parcelado?
+                                </span>
+                                <Link 
+                                    href="/cards" 
+                                    className="text-purple-400 hover:text-purple-300 font-semibold underline underline-offset-2"
+                                    onClick={onClose}
+                                >
+                                    + Cadastrar Cartão
+                                </Link>
+                            </div>
+                        )
                     )}
 
                     {/* Description */}

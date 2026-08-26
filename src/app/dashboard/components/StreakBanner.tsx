@@ -9,8 +9,8 @@ interface StreakBannerProps {
 }
 
 export function StreakBanner({ streak, level, xp }: StreakBannerProps) {
-    // XP needed for next level: base 100 * level
-    const xpNeeded = level * 1000;
+    // XP needed for next level: base 150 * level
+    const xpNeeded = level * 150;
     const progress = Math.min((xp / xpNeeded) * 100, 100);
 
     return (
